@@ -1,2 +1,2 @@
 # synaptic-twilight
-Starter project about neural networking.
+A repository for as much of my code that I can salvage.
