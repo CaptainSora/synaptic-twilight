@@ -265,6 +265,7 @@
 ;(define (prime-sub-1m? nat)
 ;  (local [(define (primality nat prime-list)
 ;            (cond [(empty? prime-list) true]
+;                  [(= 1 nat) false]
 ;                  [(> (first prime-list) (sqrt nat)) true]
 ;                  [(= (first prime-list) nat) true]
 ;                  [(zero? (remainder nat (first prime-list))) false]
@@ -360,7 +361,25 @@
 ;; ==== Question 37 ========================
 
 
+;; primes-to-1k is a list of all primes below 1000, good for checking primality
+;;   up to 1 million.
+
 ;(define primes-to-1k (sieve (build-list 1000 add1)))
+
+
+; (prime-sub-1m? nat) determines if the nat is a prime.
+; prime?: Nat -> Bool
+; requires: nat < 1000000
+
+;(define (prime-sub-1m? nat)
+;  (local [(define (primality nat prime-list)
+;            (cond [(empty? prime-list) true]
+;                  [(= 1 nat) false]
+;                  [(> (first prime-list) (sqrt nat)) true]
+;                  [(= (first prime-list) nat) true]
+;                  [(zero? (remainder nat (first prime-list))) false]
+;                  [else (primality nat (rest prime-list))]))]
+;    (primality nat primes-to-1k)))
 
 
 ;; (trunc-right nat) produces the list of numbers formed by truncating the nat
@@ -381,5 +400,33 @@
     (cond [(= 1 digits) (list nat)]
           [else (cons nat (trunc-left (modulo nat (expt 10 (sub1 digits)))))])))
 
-(trunc-right 3797)
-(trunc-left 3797)
+
+;; (truncatable-primes target) produces the sum of the first target primes which
+;;   are still prime when truncated from left to right and vice versa.
+;; truncatable-primes: Nat -> Nat
+
+;(define (truncatable-primes target)
+;  (local [(define (list-all-prime? num-list)
+;            (cond [(empty? num-list) true]
+;                  [(prime-sub-1m? (first num-list))
+;                   (list-all-prime? (rest num-list))]
+;                  [else false]))
+;          
+;          (define (find-primes current counter)
+;            (cond [(= target counter) 0]
+;                  [(< 1000000 current) -9999999] ;Outside prime finding range
+;                  [(not (prime-sub-1m? current))
+;                   (find-primes (add1 current) counter)]
+;                  [(list-all-prime? (append (rest (trunc-right current))
+;                                            (rest (trunc-left current))))
+;                   (+ current (find-primes (add1 current) (add1 counter)))]
+;                  [else
+;                   (find-primes (add1 current) counter)]))]
+;    (find-primes 10 0)))
+
+;(truncatable-primes 11)
+
+
+;; ==== Question 38 ========================
+
+

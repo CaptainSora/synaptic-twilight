@@ -430,3 +430,76 @@
 ;; ==== Question 38 ========================
 
 
+;; (concat-product nat) produces the concactenated product of a number, if
+;;   possible, or 0 if not.
+;; concat-product: Nat -> Nat
+
+(define (concat-product nat)
+  (local [(define (create-product str nat counter)
+            (cond [(> (string-length str) 9) 0]
+                  [(= (string-length str) 9) (string->number str)]
+                  [else
+                   (create-product
+                    (string-append str (number->string (* nat counter)))
+                    nat (add1 counter))]))]
+    (create-product "" nat 1)))
+
+
+;; (pandigital-nat? nat) checks if the nat is 1 to 9 pandigital.
+;; pandigital-nat: Nat -> Bool
+
+(define (pandigital-nat? nat)
+  (equal? (quicksort (explode (number->string nat)) string<?)
+          (list "1" "2" "3" "4" "5" "6" "7" "8" "9")))
+
+
+;; (largest-pandigital) produces the largest pandigital number which can
+;;   be formed as the concatenated product of an integer with (1,2, ... , n)
+;;   where n > 1.
+
+(define largest-pandigital
+  (local [(define (max-pandigital current max)
+            (local [(define concat (concat-product current))]
+              (cond [(> current 10000) max]
+                    [(or (= 0 concat)
+                         (not (pandigital-nat? concat))
+                         (<= concat max))
+                     (max-pandigital (add1 current) max)]
+                    [else
+                     (max-pandigital (add1 current) concat)])))]
+    (max-pandigital 1 0)))
+
+;largest-pandigital
+
+
+;; ==== Question 39 ========================
+
+
+;; (find-triangles p) returns the number of right-angled triangles with integral
+;;   side lengths and perimeter p.
+;; find-triangles: Nat -> Nat
+(define (find-triangles p)
+  (local [(define (try-triangles a b)
+            (local [(define c (sqrt (+ (sqr a) (sqr b))))]
+              (cond [(> a (/ p 2)) empty]
+                    [(> (+ a b c) p) (try-triangles (add1 a) (add1 a))]
+                    [(not (integer? c)) (try-triangles a (add1 b))]
+                    [(= (+ a b c) p)
+                     (cons (list a b c) (try-triangles a (add1 b)))]
+                    [else (try-triangles a (add1 b))])))]
+    (try-triangles 1 1)))
+
+
+;; (max-triangles ceiling) returns the number with the most integer right
+;;   triangles below the ceiling.
+;; max-triangles: Nat -> Nat
+(define (max-triangles ceiling)
+  (local [(define (find-max current max record)
+            (local [(define triangles (length (find-triangles current)))]
+              (cond [(> current ceiling) max]
+                    [(> triangles record)
+                     (find-max (add1 current) current triangles)]
+                    [else (find-max (add1 current) max record)])))]
+    (find-max 1 0 0)))
+
+;(max-triangles 1000)
