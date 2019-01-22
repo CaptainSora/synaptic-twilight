@@ -1,0 +1,132 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname 01-09) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #t)))
+;;
+;; **************************
+;;   Project Euler
+;; **************************
+;;
+
+;; ==== Question 1 ========================
+
+;; (mult? divisor-list dividend) returns true if the dividend is
+;;   divisible by any divisor in the list.
+;; mult?: (listof Int) Int -> Bool
+
+(define (mult? divisor-list dividend)
+  (cond [(empty? divisor-list) false]
+        [(= 0 (remainder dividend (first divisor-list))) true]
+        [else (mult? (rest divisor-list) dividend)]))
+
+
+;; (sum-of-multiples mult-list ceiling) produces the sum of all natural numbers
+;;   up to the ceiling which are divisible by at least one of the numbers in the
+;;   mult-list.
+;; sum-of-multiples: (listof Int) Nat -> Nat
+
+(define (sum-of-multiples mult-list ceiling)
+  (foldr + 0 (build-list ceiling (lambda (x) (cond [(mult? mult-list x) x]
+                                                   [else 0])))))
+
+(sum-of-multiples '(3 5) 1000)
+
+
+;; ==== Question 2 ========================
+
+
+(define fib-1 1)
+(define fib-2 2)
+
+;; (even-fib cur-fib prev-fib fib-sum ceiling) calculates the sum of all the
+;;   even fibonacci numbers not exceeding the ceiling.
+;; even-fib: Nat Nat Nat Nat -> Nat
+
+(define (even-fib cur-fib prev-fib fib-sum ceiling)
+  (cond [(> cur-fib ceiling) fib-sum]
+        [(even? cur-fib)
+         (even-fib (+ cur-fib prev-fib) cur-fib (+ cur-fib fib-sum) ceiling)]
+        [else
+         (even-fib (+ cur-fib prev-fib) cur-fib fib-sum ceiling)]))
+
+(even-fib fib-2 fib-1 0 4000000)
+
+
+;; ==== Question 3 ========================
+
+
+;; (next-prime prime-list) produces the first prime larger than all primes in
+;;   the prime list.
+;; next-prime: (listof Nat) -> Nat
+;; requires: prime-list is a list of primes in descending order.
+
+(define (next-prime prime-list)
+  (local [;; (prime-search prime-candidate) recursively checks if the prime
+          ;;   candidate is divisible by any prime in the list and produces
+          ;;   the first number that isn't.
+          ;; prime-search: Nat -> Nat
+          
+          (define (prime-search prime-candidate)
+            (cond [(mult? prime-list prime-candidate)
+                   (prime-search (+ 2 prime-candidate))]
+                  [else prime-candidate]))]
+    
+    (cond [(empty? prime-list) 2]
+          [(= 1 (length prime-list)) 3]
+          [else (prime-search (+ 2 (first prime-list)))])))
+
+
+;; (largest-factor large-num prime-list) finds the largest prime factor of a
+;;   number.
+;; largest-factor: Nat (listof Nat) -> Nat
+;; requires: prime-list is a list of primes in descending order.
+;;           large-num > 1
+
+(define (largest-factor large-num prime-list)
+  (local [(define (divide-all dividend divisor)
+            (cond [(= 0 (remainder dividend divisor))
+                   (divide-all (/ dividend divisor) divisor)]
+                  [else dividend]))]
+    (cond [(= 1 large-num) (first prime-list)]
+          [else
+           (local [(define prime (next-prime prime-list))]
+             (largest-factor (divide-all large-num prime)
+                             (cons prime prime-list)))])))
+
+(largest-factor 600851475143 empty)
+
+
+;; ==== Question 4 ========================
+
+
+(define 3-digit-max 999)
+
+
+;; (palindrome? nat) checks if the number is a palindrome.
+;; palindrome? Nat -> Bool
+
+(define (palindrome? nat)
+  (local [(define nat-list (string->list (number->string nat)))]
+    (equal? nat-list (reverse nat-list))))
+
+
+;; (largest-palindrome nat-a nat-b record) produces the largest palindrome which
+;;   is a product of two natural numbers less than a maximum.
+;; largest-palindrome: Nat Nat Nat -> Nat
+
+(define (largest-palindrome nat-a nat-b record)
+  (cond [(< nat-a (/ record 3-digit-max)) record]
+        [(< nat-b (/ record nat-a))
+         (largest-palindrome (sub1 nat-a) 3-digit-max record)]
+        [(palindrome? (* nat-a nat-b))
+         (largest-palindrome (sub1 nat-a) 3-digit-max
+                             (max record (* nat-a nat-b)))]
+        [else
+         (largest-palindrome nat-a (sub1 nat-b) record)]))
+
+(largest-palindrome 3-digit-max 3-digit-max 0)
+
+
+
+
+
+
