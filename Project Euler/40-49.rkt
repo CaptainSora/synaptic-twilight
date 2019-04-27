@@ -62,7 +62,25 @@
     (primality nat primes-to-1b)))
 
 
+;; (pandigital? nat) determines if the nat includes all numbers from 1 to n, the
+;;   number of digits of nat.
+;; pandigita?: Nat -> Nat
+
 (define (pandigital? nat)
   (local [(define len (string-length (number->string nat)))]
-    (equal? (quicksort (explode (number->string nat)) <)
-            (build-list len add1))))
+    (equal? (quicksort (explode (number->string nat)) string<?)
+            (map number->string (build-list len add1)))))
+
+
+;; (max-pandigital-prime ceiling) produces the largest pandigital prime below
+;;   the ceiling.
+;; max-pandigital-prime: Nat -> Nat
+
+(define (max-pandigital-prime ceiling)
+  (local [(define (pan-prime? nat)
+            (cond [(or (not (prime-sub-1b? nat)) (not (pandigital? nat)))
+                   (pan-prime? (sub1 nat))]
+                  [else nat]))]
+    (pan-prime? ceiling)))
+
+(max-pandigital-prime 1000000000)
